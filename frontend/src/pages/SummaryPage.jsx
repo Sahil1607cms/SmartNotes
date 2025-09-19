@@ -3,16 +3,18 @@ import ChatAssistant from "../components/ChatAssistant.jsx";
 
 export default function SummaryPage({ summary, loading }) {
   const [activeTab, setActiveTab] = useState("summary");
-
+  const [chatMessages, setChatMessages] = useState([
+    { from: "bot", text: "Hi! 👋 Ask me anything about the summary." },
+  ]);
   return (
     <div className="flex flex-col h-full bg-gray-900 text-white p-4 rounded-lg shadow-lg">
       {/* Tabs */}
       <div className="flex mb-4">
         <button
           onClick={() => setActiveTab("summary")}
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded font-bold  ${
             activeTab === "summary"
-              ? "bg-blue-600 text-white"
+              ? "bg-yellow-400 text-black"
               : "bg-gray-700 text-gray-300"
           }`}
         >
@@ -21,9 +23,9 @@ export default function SummaryPage({ summary, loading }) {
         <button
           onClick={() => setActiveTab("chat")}
           disabled={!summary}
-          className={`px-4 py-2 rounded ml-2 ${
+          className={`px-4 py-2 rounded ml-2 font-bold ${
             activeTab === "chat"
-              ? "bg-blue-600 text-white"
+              ? "bg-yellow-400 text-black"
               : "bg-gray-700 text-gray-300"
           } ${!summary && "opacity-50 cursor-not-allowed"}`}
         >
@@ -40,7 +42,13 @@ export default function SummaryPage({ summary, loading }) {
               : summary || "No summary yet."}
           </div>
         )}
-        {activeTab === "chat" && summary && <ChatAssistant summary={summary} />}
+        {activeTab === "chat" && summary && (
+          <ChatAssistant
+            summary={summary}
+            chatMessages={chatMessages}
+            setChatMessages={setChatMessages}
+          />
+        )}
       </div>
     </div>
   );
