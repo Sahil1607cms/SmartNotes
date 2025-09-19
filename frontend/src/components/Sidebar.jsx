@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Youtube, FileText, Clock } from "lucide-react";
+import { Home, Youtube, FileText, Clock ,AudioLines} from "lucide-react";
 import logo from "../assets/logo.png"
 const Sidebar = () => {
   const linkClasses = ({ isActive }) =>
@@ -29,7 +29,7 @@ const Sidebar = () => {
         </li>
         <li>
           <NavLink to="/audio-video" className={linkClasses}>
-            <Home size={20} /> Audio/Media
+            <AudioLines size={20} /> Audio/Media
           </NavLink>
         </li>
         <li>

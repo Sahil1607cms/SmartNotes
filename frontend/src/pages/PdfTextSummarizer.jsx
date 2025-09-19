@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import SummaryPage from "./SummaryPage";
-import { Paperclip } from "lucide-react";
+import { Paperclip, File } from "lucide-react";
 export default function PdfTextSummarizer() {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ export default function PdfTextSummarizer() {
           htmlFor="file-upload"
           className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded cursor-pointer hover:bg-gray-700"
         >
-          <Paperclip className="w-5 h-5" />
+          <File className="w-5 h-5" />
           {file ? file.name : "Choose a file"}
         </label>
         <button
