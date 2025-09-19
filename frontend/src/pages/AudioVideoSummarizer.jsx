@@ -12,7 +12,7 @@ export default function AudioVideoSummarizer() {
     setLoading(true);
 
     try {
-      const formData = new formData();
+      const formData = new FormData();
       formData.append("file", file);
 
       const res = await fetch("backendurl/summary", {
@@ -55,7 +55,7 @@ export default function AudioVideoSummarizer() {
           onClick={handleSummarize}
           className="px-4 py-2 bg-blue-600 rounded cursor-pointer"
         >
-          Summarize
+          <div>{loading ? "⏳ Summarizing..." : "Summarize"}</div>
         </button>
       </div>
 

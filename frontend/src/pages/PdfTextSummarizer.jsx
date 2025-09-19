@@ -54,7 +54,7 @@ export default function PdfTextSummarizer() {
           onClick={handleSummarize}
           className="px-4 py-2 bg-blue-600 rounded cursor-pointer"
         >
-          Summarize
+          <div>{loading ? "⏳ Summarizing..." : "Summarize"}</div>
         </button>
       </div>
 
