@@ -26,14 +26,15 @@ export default function YoutubeSummarizer() {
 
   return (
     <div className="flex flex-col h-full">
+      <h1 className="text-3xl py-2 px-2 font-bold " >Youtube Video Summarizer</h1>
       {/* Input */}
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 mt-2 flex gap-2">
         <input
           type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Paste YouTube link..."
-          className="flex-1 p-2 rounded bg-gray-800 text-white"
+          className="flex-1 p-2 rounded bg-gray-800  text-white"
         />
         <button
           onClick={handleSummarize}

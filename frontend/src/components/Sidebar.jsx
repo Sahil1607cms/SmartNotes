@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { Home, Youtube, FileText, Clock } from "lucide-react";
-
+import logo from "../assets/logo.png"
 const Sidebar = () => {
   const linkClasses = ({ isActive }) =>
     `flex items-center gap-3 p-2 rounded-lg cursor-pointer ${
@@ -12,9 +12,9 @@ const Sidebar = () => {
     <aside className="bg-[#12141c] text-white p-4 h-screen">
       <div className="flex items-center gap-3 mb-8">
         <img
-          src="https://via.placeholder.com/40"
+          src={logo}
           alt="App Logo"
-          className="w-10 h-10 rounded-lg"
+          className="w-10 h-10 rounded-full"
         />
         <h1 className="text-2xl font-bold ">SmartNotes</h1>
       </div>

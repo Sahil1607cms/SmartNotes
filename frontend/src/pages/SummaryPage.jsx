@@ -12,7 +12,7 @@ export default function SummaryPage({ summary, loading }) {
       <div className="flex mb-4">
         <button
           onClick={() => setActiveTab("summary")}
-          className={`px-4 py-2 rounded font-bold  ${
+          className={`px-4 py-2 rounded font-bold cursor-pointer ${
             activeTab === "summary"
               ? "bg-yellow-400 text-black"
               : "bg-gray-700 text-gray-300"
@@ -23,7 +23,7 @@ export default function SummaryPage({ summary, loading }) {
         <button
           onClick={() => setActiveTab("chat")}
           disabled={!summary}
-          className={`px-4 py-2 rounded ml-2 font-bold ${
+          className={`px-4 py-2 rounded ml-2 font-bold cursor-pointer ${
             activeTab === "chat"
               ? "bg-yellow-400 text-black"
               : "bg-gray-700 text-gray-300"

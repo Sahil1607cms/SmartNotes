@@ -7,6 +7,8 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
   const [prompts, setPrompts] = useState([]);
   const messagesEndRef = useRef(null); // 🔹 create ref
   const [thinking, setThinking] =useState(false);
+
+  //scrolling to bottom as soon as the message loads 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
@@ -65,23 +67,23 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
   return (
     <div className="flex flex-col h-full relative">
       {/* Chat Messages */}
-      <div className="space-y-2 h-full overflow-y-auto mb-20 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-900">
+      <div className="space-y-2 h-full overflow-y-auto mb-20 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {chatMessages.map((msg, idx) => (
           <div
             key={idx}
             className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
               msg.from === "bot"
-                ? "bg-gray-700 text-white self-start"
-                : "bg-green-600 text-white self-end ml-auto"
+                ? " text-white self-start"
+                : "bg-gray-600 text-white self-end ml-auto"
             }`}
           >
             {msg.text}
           </div>
         ))}
-        
+
         {/* Thinking indicator */}
         {thinking && (
-          <div className="max-w-xs px-3 py-2 rounded-lg text-sm bg-gray-500 text-white self-start">
+          <div className="max-w-xs px-3 py-2 rounded-lg text-sm  text-white self-start">
             🤔 Thinking, please wait...
           </div>
         )}
@@ -109,15 +111,15 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
       )}
 
       {/* Input Box */}
-      <div className="flex absolute bottom-0 w-full bg-gray-900 py-2">
+      <div className="flex gap-2 absolute bottom-0 w-full bg-gray-900 py-2 px-2">
         <input
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
           placeholder="Ask about the summary..."
-          className="flex-1 p-2 rounded-l bg-gray-800 text-white"
+          className="flex-1 p-2 rounded-l bg-gray-800 text-white rounded-2xl"
         />
         <button onClick={handleSendMessage}>
-          <Send className="bg-yellow-400 size-10 p-2 text-black rounded-md" />
+          <Send className="bg-yellow-400 size-10 p-2 text-black rounded-2xl" />
         </button>
       </div>
     </div>
