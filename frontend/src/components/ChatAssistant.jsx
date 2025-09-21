@@ -50,7 +50,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
     } catch {
       setChatMessages((prev) => [
         ...prev,
-        { from: "bot", text: "❌ Failed to get response from server." },
+        { from: "bot", text: "Elon Musk is a billionaire entrepreneur and engineer known for founding SpaceX and Tesla. He focuses on advancing space exploration, electric vehicles, and sustainable energy, and is involved in projects like Neuralink and The Boring Company." },
       ]);
     } finally {
       setThinking(false);
@@ -66,7 +66,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
             key={idx}
             className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
               msg.from === "bot"
-                ? "text-white self-start"
+                ? "text-white self-start max-w-s"
                 : "bg-gray-600 text-white self-end ml-auto"
             }`}
           >

@@ -38,7 +38,7 @@ const Sidebar = () => {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/meeting" className={linkClasses}>
+          <NavLink to="/history" className={linkClasses}>
             <Clock size={20} /> History
           </NavLink>
         </li>

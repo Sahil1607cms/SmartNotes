@@ -5,6 +5,7 @@ import YouTubeSummarizer from "./pages/YoutubeSummarizer.jsx";
 import AudioVideoSummarizer from "./pages/AudioVideoSummarizer.jsx";
 import PdfTextSummarizer from "./pages/PdfTextSummarizer.jsx";
 import LiveMeetingTranscriber from "./pages/LiveMeetingTranscriber.jsx";
+import History from "./pages/History.jsx";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/audio-video" element={<AudioVideoSummarizer />} />
             <Route path="/pdf-text" element={<PdfTextSummarizer />} />
             <Route path="/meeting" element={<LiveMeetingTranscriber />} />
+            <Route path="/history" element={<History />} />
           </Route>
         </Routes>
     </div>
