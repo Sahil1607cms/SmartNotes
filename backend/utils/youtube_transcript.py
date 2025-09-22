@@ -38,7 +38,7 @@ def extract_videoID(url: str) -> str:
 
     # Standard watch URL
     if "youtube.com" in hostname and path == "/watch":
-        return parse_qs(parsed_url.query).get("v", [None])[0]
+        return parse_qs(parsed_url.query).get("v", [""])[0]
 
     # Live URL
     elif "youtube.com" in hostname and path.startswith("/live/"):
