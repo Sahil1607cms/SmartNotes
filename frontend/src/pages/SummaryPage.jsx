@@ -98,7 +98,7 @@ export default function SummaryPage({ summary, loading }) {
           />
         )}
       </div>
-      <style jsx>{`
+      <style >{`
         .section-title {
           font-weight: 700;
           font-size: 1.15rem; /* bigger */
