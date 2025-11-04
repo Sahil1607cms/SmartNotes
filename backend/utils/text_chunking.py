@@ -1,9 +1,11 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+text_splitter=RecursiveCharacterTextSplitter(
+    chunk_size=1500,
+    chunk_overlap=200,
+    separators=["\n\n", "\n", ".", " ", ""],
+)
 def chunk_text(text):
-    splitter=RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
-    )
+    return text_splitter.split_text(text)
 
-    return splitter.create_documents([text])
+    
