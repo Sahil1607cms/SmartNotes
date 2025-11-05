@@ -1,34 +1,17 @@
-import os
 from langchain_community.vectorstores import FAISS
 
-BASE_DIR = "vectorstores"  # All indexes stored here
-
-def create_vector_store(docs, embeddings, store_name):
-    """Create a new FAISS vector store and save it under a unique name."""
-    os.makedirs(BASE_DIR, exist_ok=True)
-    vectorstore = FAISS.from_documents(docs, embeddings)
-    save_path = os.path.join(BASE_DIR, f"{store_name}.faiss")
-    vectorstore.save_local(save_path)
+def store_embeddings(chunks,embeddings,source_id):
+    path=f"faiss_index/{source_id}"
+    vectorstore = FAISS.from_texts(chunks,embeddings)
+    vectorstore.save_local(path)
     return vectorstore
 
+def load_embeddings(embeddings,source_id):
+    path=f"faiss_index/{source_id}"
+    vectorstore = FAISS.load_local(path,embeddings, allow_dangerous_deserialization=True)
+    return vectorstore
 
-def load_vector_store(store_name, embeddings):
-    """Load a specific FAISS vector store by its name."""
-    save_path = os.path.join(BASE_DIR, f"{store_name}.faiss")
-    if not os.path.exists(save_path):
-        raise FileNotFoundError(f"No vector store found for {store_name}")
-    return FAISS.load_local(save_path, embeddings, allow_dangerous_deserialization=True)
-
-
-def list_vector_stores():
-    """List all saved vector stores."""
-    if not os.path.exists(BASE_DIR):
-        return []
-    return [f.replace(".faiss", "") for f in os.listdir(BASE_DIR) if f.endswith(".faiss")]
-
-
-def delete_vector_store(store_name):
-    """Remove a stored FAISS index."""
-    save_path = os.path.join(BASE_DIR, f"{store_name}.faiss")
-    if os.path.exists(save_path):
-        os.remove(save_path)
+def retrieve_relevant_docs(embeddings,source_id,query,top_k=3):
+    vectorstore=load_embeddings(embeddings,source_id)
+    docs = vectorstore.similarity_search(query,k=top_k)
+    return docs
