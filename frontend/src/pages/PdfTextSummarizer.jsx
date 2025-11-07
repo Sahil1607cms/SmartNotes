@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SummaryPage from "./SummaryPage";
 import { Paperclip, File } from "lucide-react";
 export default function PdfTextSummarizer() {
@@ -6,12 +6,24 @@ export default function PdfTextSummarizer() {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null); // store uploaded file
 
+  // Persist summary locally so it survives navigation
+  useEffect(() => {
+    const saved = localStorage.getItem("summary_pdf");
+    if (saved) setSummary(saved);
+  }, []);
+
+  useEffect(() => {
+    if (summary !== undefined) {
+      localStorage.setItem("summary_pdf", summary || "");
+    }
+  }, [summary]);
+
   const handleSummarize = async () => {
     if (!file) return;
     setLoading(true);
 
     try {
-      const formData = new formData();
+      const formData = new FormData();
       formData.append("file", file);
 
       const res = await fetch("http://localhost:8000/summary", {

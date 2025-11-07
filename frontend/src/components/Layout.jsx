@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 
 export default function Layout() {
   return (
-    <div className="grid grid-cols-[250px_1fr] h-screen">
+    <div className="grid md:grid-cols-[250px_1fr] grid-cols-[170px_1fr] h-screen">
       <Sidebar />
 
       <div className="flex flex-col bg-[#0f1117] text-white h-screen">

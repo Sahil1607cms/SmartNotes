@@ -6,7 +6,7 @@ export default function PublicOnlyRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (user) return <Navigate to="/yt" replace />;
-  return children;
+  return children; //return back to login page 
 }
 
 

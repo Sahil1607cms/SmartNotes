@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import logo from "../assets/logo.png"; // make sure you have this
+import logo from "../assets/logo.png"; 
 
 export default function Login() {
   const { loginWithGoogle } = useAuth();
@@ -22,23 +22,23 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black text-white">
-      <div className="w-full max-w-sm p-8 rounded-2xl border border-gray-800 bg-[#0f1117] shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black text-white px-4">
+      <div className="w-full max-w-sm p-6 sm:p-8 rounded-2xl border border-gray-800 bg-[#0f1117] shadow-lg">
         {/* Logo + Title */}
         <div className="flex flex-col items-center mb-8">
-          <img src={logo} alt="App Logo" className="w-14 h-14 rounded-full mb-3" />
-          <h1 className="text-3xl font-bold">SmartNotes</h1>
-          <p className="text-gray-400 text-sm mt-1">Sign in to continue</p>
+          <img src={logo} alt="App Logo" className="w-12 h-12 sm:w-14 sm:h-14 rounded-full mb-3" />
+          <h1 className="text-2xl sm:text-3xl font-bold">SmartNotes</h1>
+          <p className="text-gray-400 text-xs sm:text-sm mt-1">Sign in to continue</p>
         </div>
 
         {/* Google Button */}
         <button
           onClick={handleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-white text-gray-800 font-medium py-2.5 rounded-lg shadow hover:bg-gray-100 transition"
+          className="w-full flex items-center justify-center gap-2 sm:gap-3 bg-white text-gray-800 font-medium py-2.5 rounded-lg shadow hover:bg-gray-100 transition text-sm sm:text-base"
         >
           {/* Google "G" logo */}
           <svg
-            className="w-5 h-5"
+            className="w-4 h-4 sm:w-5 sm:h-5"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 488 512"
           >

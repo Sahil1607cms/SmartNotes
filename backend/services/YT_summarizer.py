@@ -3,11 +3,10 @@ import asyncio
 import nest_asyncio
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain.chains.summarize import load_summarize_chain
-from langchain.prompts import PromptTemplate
-from langchain.docstore.document import Document
+from langchain_core.prompts import PromptTemplate
 from pydantic import SecretStr
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.output_parsers import StrOutputParser
 import random
 import re 
 
@@ -65,14 +64,14 @@ def chunk_transcript(transcripts: list[dict], chunk_size=CHUNK_SIZE):
     return [doc.page_content for doc in docs]
 
 # rate limit handling 
-summarization_chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
+summarization_chain = prompt | llm | StrOutputParser()
+
 async def safe_summarize(text: str) -> str:
     try:
         if not text.strip():
             return "No content found."
-        docs = [Document(page_content=text)]
         
-        return summarization_chain.run(docs).strip()
+        return await summarization_chain.ainvoke({"text": text})
     # retrying logic while ensuring rate limiting
     except Exception as e:
         msg = str(e)

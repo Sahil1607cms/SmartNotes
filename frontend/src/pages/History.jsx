@@ -88,8 +88,8 @@ export default function History() {
   };
 
   return (
-    <div className=" mx-auto p-6 flex flex-col h-[100vh]">
-      <h1 className="text-2xl font-bold mb-4">Notes History</h1>
+    <div className="mx-auto p-3 sm:p-6 flex flex-col h-[100vh]">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4">Notes History</h1>
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-3 text-gray-400" size={18} />
@@ -98,7 +98,7 @@ export default function History() {
           placeholder="Search notes..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring focus:ring-blue-300 outline-none"
+          className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring focus:ring-blue-300 outline-none text-sm sm:text-base"
         />
       </div>
 
@@ -112,48 +112,48 @@ export default function History() {
               <div
                 key={note.id}
                 onClick={() => setSelectedNote(note)}
-                className="p-4 border-0 rounded-xl hover:bg-gray-700 cursor-pointer transition"
+                className="p-3 sm:p-4 border-0 rounded-xl hover:bg-gray-700 cursor-pointer transition"
               >
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="text-lg text-yellow-300 font-semibold">{note.title}</h2>
-                  <span className="text-sm text-gray-300">{note.date}</span>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
+                  <h2 className="text-base sm:text-lg text-yellow-300 font-semibold break-words">{note.title}</h2>
+                  <span className="text-xs sm:text-sm text-gray-300 whitespace-nowrap">{note.date}</span>
                 </div>
-                <p className="text-gray-300 line-clamp-2">{note.summary}</p>
+                <p className="text-sm sm:text-base text-gray-300 line-clamp-2">{note.summary}</p>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 text-center py-8">No notes found.</p>
+            <p className="text-gray-500 text-center py-8 text-sm sm:text-base">No notes found.</p>
           )}
         </div>
       )}
 
       {/* Modal */}
       {selectedNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl w-full max-w-2xl p-6 relative flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-2 sm:p-4">
+          <div className="bg-gray-800 rounded-xl w-full max-w-2xl p-4 sm:p-6 relative flex flex-col max-h-[90vh]">
             {/* Close button */}
             <button
               onClick={() => setSelectedNote(null)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-white"
+              className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-white p-1"
             >
-              <X size={24} />
+              <X size={20} className="sm:w-6 sm:h-6" />
             </button>
 
             {/* Copy button */}
             <button
               onClick={() => copySummary(selectedNote.summary)}
-              className="absolute top-3 right-12 text-black bg-white rounded-md hover:text-white flex items-center gap-1"
+              className="absolute top-2 right-10 sm:top-3 sm:right-12 text-black bg-white rounded-md hover:bg-gray-200 flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
             >
-              <Copy size={18} className="text-black"/> Copy
+              <Copy size={16} className="sm:w-[18px] sm:h-[18px] text-black"/> <span className="hidden sm:inline">Copy</span>
             </button>
 
-            <h2 className="text-2xl mt-2 font-bold text-yellow-300 mb-4">{selectedNote.title}</h2>
-            <p className="text-sm text-gray-400 mb-2 " >Type: {selectedNote.type}</p>
-            <p className="text-sm text-gray-400 mb-4">Source: {selectedNote.source}</p>
+            <h2 className="text-lg sm:text-2xl mt-2 font-bold text-yellow-300 mb-4 pr-16 break-words">{selectedNote.title}</h2>
+            <p className="text-xs sm:text-sm text-gray-400 mb-2">Type: {selectedNote.type}</p>
+            <p className="text-xs sm:text-sm text-gray-400 mb-4 break-all">Source: {selectedNote.source}</p>
 
             {/* Scrollable summary */}
             <div
-              className="overflow-y-auto text-gray-300"
+              className="overflow-y-auto text-gray-300 text-sm sm:text-base"
               style={{ maxHeight: "60vh" }}
               dangerouslySetInnerHTML={{ __html: formatSummary(selectedNote.summary) }}
             />

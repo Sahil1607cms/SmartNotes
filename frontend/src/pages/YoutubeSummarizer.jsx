@@ -20,6 +20,26 @@ export default function YoutubeSummarizer() {
     return () => unsubscribe();
   }, []);
 
+  // Persist summary locally so it survives navigation
+  useEffect(() => {
+    const savedSummary = localStorage.getItem("summary_youtube");
+    if (savedSummary) {
+      const savedUrl = localStorage.getItem("summary_url");
+      const savedTranscript = localStorage.getItem("summary_transcript");
+      setSummary(savedSummary);
+      setUrl(savedUrl);
+      setTranscript(savedTranscript);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (summary !== undefined) {
+      localStorage.setItem("summary_youtube", summary || "");
+      localStorage.setItem("summary_url", url || "");
+      localStorage.setItem("summary_transcript", transcript || "");
+    }
+  }, [summary]);
+
   const handleSummarize = async () => {
     if (!url.trim()) return;
     if (!transcript || transcript.length === 0) {

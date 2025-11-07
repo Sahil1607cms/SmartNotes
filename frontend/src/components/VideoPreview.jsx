@@ -67,7 +67,7 @@ export default function VideoPreview({ url, setTranscript, setTitle }) {
   };
 
   return (
-    <div className="flex flex-col p-2 border-r h border-gray-700">
+    <div className="flex flex-col p-2 border-r md:w-full w-[250px] border-gray-700">
       <div className="aspect-video min-h-[200px] w-full bg-black rounded-lg overflow-hidden">
         {videoId ? (
           <iframe

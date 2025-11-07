@@ -6,13 +6,13 @@ import AudioVideoSummarizer from "./pages/AudioVideoSummarizer.jsx";
 import PdfTextSummarizer from "./pages/PdfTextSummarizer.jsx";
 import LiveMeetingTranscriber from "./pages/LiveMeetingTranscriber.jsx";
 import History from "./pages/History.jsx";
+import PublicOnlyRoute from "./components/PublicOnlyRoute.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Login from "./pages/Login.jsx";
-import PublicOnlyRoute from "./components/PublicOnlyRoute.jsx";
 
 function App() {
   return (
-    <div className="h-screen">
+    <div className="h-screen bg-black">
       <Routes>
           <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
         <Route

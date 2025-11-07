@@ -63,9 +63,9 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
         {chatMessages.map((msg, idx) => (
           <div
             key={idx}
-            className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+            className={`max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-xs sm:text-sm ${
               msg.from === "bot"
-                ? "text-white self-start max-w-s"
+                ? "text-white self-start"
                 : "bg-gray-600 text-white self-end ml-auto"
             }`}
           >
@@ -74,7 +74,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
         ))}
 
         {thinking && (
-          <div className="max-w-xs px-3 py-2 rounded-lg text-sm text-white self-start">
+          <div className="max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-xs sm:text-sm text-white self-start">
             🤔 Thinking, please wait...
           </div>
         )}
@@ -82,7 +82,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
       </div>
 
       {prompts.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-2 overflow-x-auto">
+        <div className="mb-2 flex flex-wrap gap-2 overflow-x-auto pb-2">
           {prompts.map((msg, idx) => (
             <div
               key={idx}
@@ -90,7 +90,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
                 setChatInput(msg.text);
                 setTimeout(() => handleSendMessage(), 0);
               }}
-              className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm cursor-pointer"
+              className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm cursor-pointer whitespace-nowrap"
             >
               {msg.text}
             </div>
@@ -103,10 +103,11 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages }) => {
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
           placeholder="Ask about the summary..."
-          className="flex-1 p-2 rounded-l bg-gray-800 text-white rounded-2xl"
+          className="flex-1 p-2 rounded-l bg-gray-800 text-white rounded-2xl text-sm sm:text-base"
+          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
         />
-        <button onClick={handleSendMessage}>
-          <Send className="bg-yellow-400 size-10 p-2 text-black rounded-2xl" />
+        <button onClick={handleSendMessage} className="flex-shrink-0">
+          <Send className="bg-yellow-400 w-8 h-8 sm:w-10 sm:h-10 p-1.5 sm:p-2 text-black rounded-2xl" />
         </button>
       </div>
     </div>
