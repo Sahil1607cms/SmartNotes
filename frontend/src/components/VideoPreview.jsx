@@ -20,21 +20,28 @@ export default function VideoPreview({ url, setTranscript, setTitle }) {
           setLocalTranscript(data.transcript);
           setTranscript(data.transcript);
         } else {
-          setLocalTranscript([{ time: "00:00", text: "Transcript not available" }]);
+          setLocalTranscript([
+            { time: "00:00", text: "Transcript not available" },
+          ]);
           setTranscript([{ time: "00:00", text: "Transcript not available" }]);
         }
 
         // Fetch video title
-        const resTitle = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+        const resTitle = await fetch(
+          `https://www.youtube.com/oembed?url=${encodeURIComponent(
+            url
+          )}&format=json`
+        );
         if (resTitle.ok) {
           const titleData = await resTitle.json();
           setTitle(titleData.title || "YouTube Video");
         } else {
           setTitle("YouTube Video");
         }
-
       } catch (error) {
-        setLocalTranscript([{ time: "00:00", text: "Error fetching transcript" }]);
+        setLocalTranscript([
+          { time: "00:00", text: "Error fetching transcript" },
+        ]);
         setTranscript([{ time: "00:00", text: "Error fetching transcript" }]);
         setTitle("YouTube Video");
         console.error(error);
@@ -47,10 +54,14 @@ export default function VideoPreview({ url, setTranscript, setTitle }) {
   const getYouTubeId = (ytUrl) => {
     if (!ytUrl) return null;
     try {
-      if (ytUrl.includes("youtu.be/")) return ytUrl.split("youtu.be/")[1].split(/[?&]/)[0];
-      if (ytUrl.includes("youtube.com/watch")) return new URL(ytUrl).searchParams.get("v");
-      if (ytUrl.includes("youtube.com/embed/")) return ytUrl.split("embed/")[1].split(/[?&]/)[0];
-      if (ytUrl.includes("youtube.com/shorts/")) return ytUrl.split("shorts/")[1].split(/[?&]/)[0];
+      if (ytUrl.includes("youtu.be/"))
+        return ytUrl.split("youtu.be/")[1].split(/[?&]/)[0];
+      if (ytUrl.includes("youtube.com/watch"))
+        return new URL(ytUrl).searchParams.get("v");
+      if (ytUrl.includes("youtube.com/embed/"))
+        return ytUrl.split("embed/")[1].split(/[?&]/)[0];
+      if (ytUrl.includes("youtube.com/shorts/"))
+        return ytUrl.split("shorts/")[1].split(/[?&]/)[0];
       return null;
     } catch {
       return null;
@@ -60,7 +71,9 @@ export default function VideoPreview({ url, setTranscript, setTitle }) {
   const videoId = getYouTubeId(url);
 
   const handleCopyAll = () => {
-    const textToCopy = localTranscript.map(line => `${line.time} - ${line.text}`).join("\n");
+    const textToCopy = localTranscript
+      .map((line) => `${line.time} - ${line.text}`)
+      .join("\n");
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -91,15 +104,22 @@ export default function VideoPreview({ url, setTranscript, setTitle }) {
             onClick={handleCopyAll}
             className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 rounded text-sm"
           >
-            {copied ? <span className="text-green-400">Copied!</span> : <>
-              <Copy className="w-4 h-4" /> Copy All
-            </>}
+            {copied ? (
+              <span className="text-green-400">Copied!</span>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" /> Copy All
+              </>
+            )}
           </button>
         </div>
 
         <div className="max-h-85 overflow-y-auto space-y-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {localTranscript.map((line, i) => (
-            <div key={i} className="p-2 bg-gray-900 overflow-hidden max-h-14 rounded-lg">
+            <div
+              key={i}
+              className="p-2 bg-gray-900 overflow-hidden max-h-14 rounded-lg"
+            >
               <span className="text-sm text-blue-400 mr-2">{line.time}</span>
               <span>{line.text}</span>
             </div>

@@ -23,9 +23,9 @@ export default function YoutubeSummarizer() {
   // Persist summary locally so it survives navigation
   useEffect(() => {
     const savedSummary = localStorage.getItem("summary_youtube");
-    if (savedSummary) {
-      const savedUrl = localStorage.getItem("summary_url");
-      const savedTranscript = localStorage.getItem("summary_transcript");
+    const savedUrl = localStorage.getItem("summary_url");
+    const savedTranscript = localStorage.getItem("summary_transcript");
+    if (savedUrl && savedSummary) {
       setSummary(savedSummary);
       setUrl(savedUrl);
       setTranscript(savedTranscript);
@@ -33,12 +33,14 @@ export default function YoutubeSummarizer() {
   }, []);
 
   useEffect(() => {
-    if (summary !== undefined) {
-      localStorage.setItem("summary_youtube", summary || "");
-      localStorage.setItem("summary_url", url || "");
-      localStorage.setItem("summary_transcript", transcript || "");
+    if (summary) {
+      localStorage.setItem("summary_youtube", summary );
+      localStorage.setItem("summary_url", url );
+      localStorage.setItem("summary_transcript",transcript);
     }
   }, [summary]);
+
+  
 
   const handleSummarize = async () => {
     if (!url.trim()) return;
@@ -66,7 +68,6 @@ export default function YoutubeSummarizer() {
       console.log("Backend response:", data);
       if (data.summary) setSummary(data.summary);
       else setSummary("❌ Failed to generate summary.");
-
     } catch (err) {
       console.error(err);
       setSummary("❌ Failed to generate summary.");
@@ -93,7 +94,9 @@ export default function YoutubeSummarizer() {
         <button
           onClick={handleSummarize}
           className={`px-4 py-2 rounded ${
-            transcript.length > 0 && url ? "bg-blue-600" : "bg-gray-600 cursor-not-allowed"
+            transcript.length > 0 && url
+              ? "bg-blue-600"
+              : "bg-gray-600 cursor-not-allowed"
           }`}
           disabled={transcript.length === 0 || !url || loading}
         >
@@ -102,7 +105,11 @@ export default function YoutubeSummarizer() {
       </div>
 
       <div className="grid grid-cols-[400px_1fr] flex-1 min-h-0">
-        <VideoPreview url={url} setTranscript={setTranscript} setTitle={setTitle} />
+        <VideoPreview
+          url={url}
+          setTranscript={setTranscript}
+          setTitle={setTitle}
+        />
         <SummaryPage summary={summary} loading={loading} />
       </div>
     </div>
