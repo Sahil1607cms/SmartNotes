@@ -130,7 +130,7 @@ export default function History() {
       {/* Modal */}
       {selectedNote && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-2 sm:p-4">
-          <div className="bg-gray-800 rounded-xl w-full max-w-2xl p-4 sm:p-6 relative flex flex-col max-h-[90vh]">
+          <div className="bg-gray-800 rounded-xl w-full  p-4 sm:p-6 relative flex flex-col max-h-[90vh]">
             {/* Close button */}
             <button
               onClick={() => setSelectedNote(null)}
@@ -153,7 +153,7 @@ export default function History() {
 
             {/* Scrollable summary */}
             <div
-              className="overflow-y-auto text-gray-300 text-sm sm:text-base"
+              className="overflow-y-auto text-gray-300 text-3xl sm:text-base"
               style={{ maxHeight: "60vh" }}
               dangerouslySetInnerHTML={{ __html: formatSummary(selectedNote.summary) }}
             />
