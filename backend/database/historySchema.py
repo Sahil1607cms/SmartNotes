@@ -4,7 +4,7 @@ from datetime import datetime
 
 class NoteModel(BaseModel):
     user_id: str
-    title: str
+    title: str | None
     type: str | None
     summary: str
     transcript: Optional[list[Dict[str, Any]] ] = None
