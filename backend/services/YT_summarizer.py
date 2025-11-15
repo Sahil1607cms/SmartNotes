@@ -25,7 +25,7 @@ prompt_template = """
 You are an expert summarizer. Summarize the following tutorial or educational transcript clearly and accurately.
 
 Guidelines:
-- Use English only strictly (not hindi) for response, under 600 words.
+- Use English only strictly (not hindi) for response.
 - Explain concepts, steps, logic, and examples.
 - Exclude code, personal remarks, or unrelated info.
 - Use clear section titles and bullet points.

@@ -16,6 +16,9 @@ export default function SummaryPage({ summary, loading }) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+  const downloadPDF=()=>{
+    
+  }
 
   return (
     <div className="flex flex-col w-full h-full min-h-0 bg-black text-white p-2 sm:p-4 rounded-lg shadow-lg">
@@ -55,7 +58,7 @@ export default function SummaryPage({ summary, loading }) {
           Flashcards
         </button>
         <button
-          onClick={handleCopyAll}
+          onClick={()=>downloadPDF()}
           className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
         >
           <>
