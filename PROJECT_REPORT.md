@@ -283,3 +283,4 @@ The project showcases the successful combination of research concepts (RAG, sema
 
 The project serves as a foundation for further research and development in AI-powered knowledge management systems, with potential applications in education, research, and professional content analysis.
 
+

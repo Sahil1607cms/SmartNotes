@@ -9,6 +9,8 @@ from youtube_transcript_api._errors import IpBlocked, NoTranscriptFound
 from utils.youtube_transcript import get_transcripts
 from services.YT_summarizer import summarize_long_transcript
 from services.PDF_summarizer import summarize_long_pdf
+from services.Media_summarizer import summarize_long_transcript as summarize_media_transcript
+from services.media_summariser.process_media import process_media_file
 
 from database.historySchema import NoteModel, NoteResponseModel
 from database.crud import create_note, get_notes_by_user
@@ -86,32 +88,72 @@ async def summarize_youtube_and_save(req: SummarizeRequest):
         return {"error": str(e)}
 
 # --------------------------
-# Summarize & Save Note YOUTUBE
+# Summarize & Save Note MEDIA (Audio/Video)
 # --------------------------
 @app.post("/summarize-media")
-async def summarize_media_and_save(req: SummarizeRequest):
+async def summarize_media_and_save(
+    file: UploadFile = File(...),
+    user_id: str = Form(...),
+    type: str = Form("media")
+):
+    """
+    Process uploaded audio/video file: transcribe and summarize.
+    """
+    import tempfile
+    
+    temp_file_path = None
     try:
-        if req.transcript:
-            transcripts = [item.dict() for item in req.transcript]
-        else:
-            return {"error": "Provide a transcript "}
-
-        summary = await summarize_long_transcript(transcripts)
-
+        # Validate file type
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        allowed_extensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac', '.mp4', '.avi', '.mov', '.mkv', '.webm']
+        
+        if file_ext not in allowed_extensions:
+            return {"error": f"Unsupported file format: {file_ext}. Supported formats: {', '.join(allowed_extensions)}"}
+        
+        # Save uploaded file temporarily
+        file_bytes = await file.read()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
+            temp_file.write(file_bytes)
+            temp_file_path = temp_file.name
+        
+        print(f"Processing media file: {file.filename}")
+        
+        # Process media file (transcribe)
+        transcripts = await process_media_file(temp_file_path, file.filename)
+        
+        if not transcripts or len(transcripts) == 0:
+            return {"error": "Failed to transcribe the media file. Please ensure the file contains audio."}
+        
+        # Summarize transcript
+        summary = await summarize_media_transcript(transcripts)
+        
+        # Save to database
         note_data = NoteModel(
-            user_id=req.user_id,
-            title=req.title,
-            type=req.type,
+            user_id=user_id,
+            title=file.filename,
+            type=type,
             summary=summary,
+            transcript=transcripts,
             source="Uploaded media"
         )
-
+        
         saved_note = create_note(note_data)
-
+        
         return {"summary": summary, "note": saved_note}
-
-    except Exception as e:
+    
+    except ValueError as e:
         return {"error": str(e)}
+    except Exception as e:
+        print(f"Error processing media file: {str(e)}")
+        return {"error": f"Failed to process media file: {str(e)}"}
+    
+    finally:
+        # Clean up temporary file
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+            except OSError:
+                pass
 
 
 # --------------------------
