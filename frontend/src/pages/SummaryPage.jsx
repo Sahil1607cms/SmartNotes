@@ -16,12 +16,9 @@ export default function SummaryPage({ summary, loading }) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-<<<<<<< Updated upstream
-=======
   const downloadPDF=()=>{
 
   }
->>>>>>> Stashed changes
 
   return (
     <div className="flex flex-col w-full h-full min-h-0 bg-black text-white p-2 sm:p-4 rounded-lg shadow-lg">
@@ -61,8 +58,6 @@ export default function SummaryPage({ summary, loading }) {
         >
           Flashcards
         </button>
-<<<<<<< Updated upstream
-=======
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -74,7 +69,6 @@ export default function SummaryPage({ summary, loading }) {
             <span className="">Save to PDF</span>
           </>
         </button>
->>>>>>> Stashed changes
         <button
           onClick={handleCopyAll}
           className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
@@ -94,11 +88,7 @@ export default function SummaryPage({ summary, loading }) {
 
       <div className="flex-1 min-h-0 min-w-full flex flex-col">
         {activeTab === "summary" && (
-<<<<<<< Updated upstream
-          <div className="bg-gray-800 p-2 sm:p-4 rounded-lg shadow-inner  flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm sm:text-base">
-=======
           <div className="bg-black p-2 sm:p-4 rounded-lg shadow-inner  flex-1 overflow-y-auto  text-sm sm:text-base">
->>>>>>> Stashed changes
             {loading ? (
               "⏳ Generating summary..."
             ) : summary ? (
