@@ -14,8 +14,12 @@ import asyncio
 
 load_dotenv()
 
-# Initialize device
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+WHISPER_MODEL = WhisperModel("small", device="cuda", compute_type="float32",cpu_threads=0,num_workers=1)
+if not torch.cuda.is_available():
+    raise RuntimeError("GPU not being used — aborting.")
+PIPELINE = BatchedInferencePipeline(model=WHISPER_MODEL)
+print(WHISPER_MODEL.model.device)
+
 
 def convert_video_to_audio(input_file: str, output_file: str, speed: float = 1.25) -> bool:
     """
@@ -50,52 +54,23 @@ def convert_video_to_audio(input_file: str, output_file: str, speed: float = 1.2
         return False
 
 
-def transcribe_audio(audio_path: str, model_size: str = "small", batch_size: int = 8) -> List[Dict[str, Any]]:
-    """
-    Transcribe audio file using Whisper model.
-    
-    Args:
-        audio_path: Path to audio file
-        model_size: Whisper model size (tiny, base, small, medium, large)
-        batch_size: Batch size for transcription
-    
-    Returns:
-        List of transcript segments with time and text
-    """
+def transcribe_audio(audio_path: str, batch_size: int = 8) -> List[Dict[str, Any]]:
     try:
-        # Clean up GPU memory
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        
-        # Initialize Whisper model
-        compute_type = "float16" if device == "cuda" else "int8"
-        model = WhisperModel(model_size, device=device, compute_type=compute_type)
-        batched_model = BatchedInferencePipeline(model=model)
         
         # Transcribe
-        segments, info = batched_model.transcribe(
+        segments, info = PIPELINE.transcribe(
             audio_path, 
             batch_size=batch_size, 
             word_timestamps=True
         )
         
-        # Format transcript
-        transcript = []
-        for segment in segments:
-            transcript.append({
-                "time": f"{segment.start:.2f}s -> {segment.end:.2f}s",
-                "text": segment.text.strip()
-            })
-        
-        # Clean up
-        del model
-        del batched_model
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        
-        return transcript
+        return [
+            {
+                "time": f"{s.start:.2f}s -> {s.end:.2f}s",
+                "text": s.text.strip()
+            }
+            for s in segments
+        ]
     
     except Exception as e:
         print(f"Error during transcription: {e}")
@@ -130,17 +105,18 @@ async def process_media_file(file_path: str, filename: str) -> List[Dict[str, An
         
         # If video, convert to audio first
         if is_video:
-            temp_audio_path = tempfile.mktemp(suffix='.mp3')
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+                temp_audio_path = tmp.name
             success = convert_video_to_audio(file_path, temp_audio_path)
             if not success:
                 raise Exception("Failed to convert video to audio")
             audio_path = temp_audio_path
         else:
             audio_path = file_path
-        
+        print("Audio Path generated : ", audio_path)
         # Transcribe audio (this is a blocking operation)
         transcript = transcribe_audio(audio_path)
-        
+        print("Transcript generated : ", transcript)
         return transcript
     
     try:

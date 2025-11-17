@@ -104,6 +104,8 @@ async def summarize_media_and_save(
     temp_file_path = None
     try:
         # Validate file type
+        if not file.filename:
+            return {"error": "File name is required"}
         file_ext = os.path.splitext(file.filename)[1].lower()
         allowed_extensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac', '.mp4', '.avi', '.mov', '.mkv', '.webm']
         
@@ -123,7 +125,7 @@ async def summarize_media_and_save(
         
         if not transcripts or len(transcripts) == 0:
             return {"error": "Failed to transcribe the media file. Please ensure the file contains audio."}
-        
+        print("Transcript length is : ",len(transcripts))
         # Summarize transcript
         summary = await summarize_media_transcript(transcripts)
         
@@ -170,6 +172,8 @@ async def summarize_PDF_and_save(
         from langchain_community.document_loaders import PyPDFLoader
         temp_pdf_path = None
         try:
+            if not file.filename:
+                return {"error": "File name is required"}
             pdf_bytes = await file.read()
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
                 temp_pdf.write(pdf_bytes)

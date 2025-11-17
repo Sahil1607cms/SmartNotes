@@ -71,10 +71,18 @@ export default function AudioVideoSummarizer() {
 
   return (
     <div className="flex flex-col h-full">
-      <h1 className="text-xl sm:text-2xl md:text-3xl py-2 px-2 font-bold min-h-[50px]">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl sm:text-2xl md:text-3xl py-2 px-2 font-bold min-h-[50px]">
         Select an Audio or Video to get the summary
       </h1>
-      <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] flex-1 gap-2">
+      <button
+          onClick={() => clearStorage()}
+          className="bg-amber-300   mt-2 text-black p-1 font-bold rounded-md cursor-pointer hover:bg-amber-200"
+        >
+          Clear Page
+        </button>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] flex-1 gap-2 min-h-0">
         {/* Input */}
         <div className="mb-4 mt-2 flex flex-col items-center justify-center gap-2 px-2">
           <input
