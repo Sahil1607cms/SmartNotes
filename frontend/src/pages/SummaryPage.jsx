@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import ChatAssistant from "../components/ChatAssistant.jsx";
 import { Copy, Download } from "lucide-react";
+import Flashcards from "../components/Flashcards.jsx";
 
 export default function SummaryPage({ summary, loading }) {
   const [activeTab, setActiveTab] = useState("summary");
@@ -48,7 +49,7 @@ export default function SummaryPage({ summary, loading }) {
         </button>
 
         <button
-          onClick={() => alert("Flashcards feature coming soon!")}
+        onClick={() => setActiveTab("flashcards")}
           disabled={!summary}
           className={`px-3 sm:px-4 py-2 rounded font-bold cursor-pointer text-sm sm:text-base ${
             activeTab === "flashcards"
@@ -150,6 +151,11 @@ export default function SummaryPage({ summary, loading }) {
             summary={summary}
             chatMessages={chatMessages}
             setChatMessages={setChatMessages}
+          />
+        )}
+        {activeTab === "flashcards" && summary && (
+          <Flashcards
+            summary={summary}
           />
         )}
       </div>

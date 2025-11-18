@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import os
+from groq import Groq
 
 from youtube_transcript_api._errors import IpBlocked, NoTranscriptFound
 from utils.youtube_transcript import get_transcripts
@@ -40,6 +41,9 @@ class SummarizeRequest(BaseModel):
     type: str = "youtube"  
     url: Optional[str] = None
     transcript: Optional[List[TranscriptItem]] = None
+
+class FlashcardRequest(BaseModel):
+    summary: str
 
 # --------------------------
 # YouTube Transcript API route for viewPage component transcript displaying
@@ -225,5 +229,68 @@ def get_user_notes(user_id: str = Query(..., description="ID of the logged-in us
         return response_notes
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# --------------------------
+# Generate Flashcard Bullet Points from Summary
+# --------------------------
+@app.post("/summarize-flashcard")
+async def summarize_for_flashcard(req: FlashcardRequest):
+    try:
+        if not req.summary or req.summary.strip() == "":
+            return {"error": "Summary is required"}
+        
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key:
+            return {"error": "Groq API key not configured"}
+        
+        client = Groq(api_key=groq_api_key)
+        
+        prompt = f"""
+Extract exactly 6 key bullet points from the following summary. 
+Each bullet point should be concise (max 15 words) and capture the main idea.
+Format as a numbered list (1., 2., 3., etc).
+
+Summary:
+{req.summary}
+
+Bullet Points:
+"""
+        
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=500,
+            temperature=0.7
+        )
+        
+        bullet_points_text = response.choices[0].message.content
+        if not bullet_points_text:
+            return {"status": "error", "error": "No response from Groq"}
+        
+        bullet_points_text = bullet_points_text.strip()
+        
+        # Parse bullet points into a list
+        lines = bullet_points_text.split("\n")
+        bullet_points = []
+        for line in lines:
+            line = line.strip()
+            if line and (line[0].isdigit() or line.startswith("-") or line.startswith("•")):
+                # Remove numbering or bullet markers
+                cleaned = line.lstrip("0123456789.-•) ").strip()
+                if cleaned:
+                    bullet_points.append(cleaned)
+        
+        # Ensure we have exactly 6 (or as many as extracted)
+        bullet_points = bullet_points[:6]
+        
+        return {
+            "status": "success",
+            "bullet_points": bullet_points,
+            "count": len(bullet_points)
+        }
+    
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
 
