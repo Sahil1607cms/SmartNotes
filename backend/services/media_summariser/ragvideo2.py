@@ -131,5 +131,100 @@ except Exception as e:
 
 
 
+# === Wrapper + Test ===
+
+def format_docs(docs):
+    """Helper to convert retrieved docs (list) into a single string context block."""
+    # docs are expected to have .page_content
+    try:
+        return "\n\n".join([doc.page_content for doc in docs])
+    except Exception:
+        # defensive fallback
+        return " ".join([getattr(d, "page_content", str(d)) for d in docs])
+
+def build_rag_chain(retriever_obj, prompt_obj, llm_obj):
+    """
+    Build and return the RAG runnable chain used to answer queries.
+    This mirrors the chain in your snippet.
+    """
+    # We use RunnablePassthrough via the prompt and LLM objects already configured
+    # The retriever is used as retriever_obj | format_docs in the same style as your snippet.
+    rag_chain = (
+        {"context": retriever_obj | format_docs, "query": RunnablePassthrough()}
+        | prompt_obj
+        | llm_obj
+        | StrOutputParser()
+    )
+    return rag_chain
+
+
+def generate_reply(message: str, summary: Optional[str] = None, collection: str = "default", top_k: int = 5) -> str:
+    """
+    Final wrapper to generate a reply string for `message`.
+    - Uses the global `retriever`, `custom_prompt`, and `llm` defined earlier.
+    - Returns the LLM text output (or an error string).
+    - Replace or extend with collection-specific loading logic if you persist multiple vectorstores.
+    """
+    if not isinstance(message, str) or not message.strip():
+        return "Please provide a non-empty message."
+
+    try:
+        # Optional: if your retriever supports setting k, do so here (depends on implementation).
+        # Many retrievers accept search parameters at call-time; if not, you can use as-is.
+        # Example (pseudo): retriever_obj.search_kwargs = {"k": top_k}
+        # For the FAISS retriever from your snippet, you can pass top_k via retriever.get_relevant_documents(...) if available.
+        # We'll just build the chain and invoke with message (the retriever is bound to the chain).
+        rag_chain = build_rag_chain(retriever, custom_prompt, llm)
+
+        # If you want to include `summary` in the prompt, you could modify the ChatPromptTemplate or
+        # pass a combined query like f"{summary}\n\nUser: {message}". For now we pass `message` directly.
+        # If your prompt expects both 'context' and 'query' keys, the chain will handle the retrieval -> formatting -> prompt.
+        result = rag_chain.invoke(message)
+
+        # Ensure result is a string
+        if result is None:
+            return "⚠️ No reply generated."
+        return str(result)
+
+    except Exception as e:
+        logging.exception("generate_reply failed")
+        return f"❌ Error generating reply: {str(e)}"
+
+
+def main():
+    """
+    Test harness for the generate_reply wrapper.
+    - Uses a sample query or interactive input.
+    - Prints the result to stdout.
+    - Also shows the example uploaded file path (from session) used as a sample source_url.
+    """
+    # Example: path to the file uploaded earlier in this session (keeps developer-provided path)
+    uploaded_file_path = "/mnt/data/444d529c-83c4-4eb0-9a9c-c7a0167029a1.png"
+
+    print("=== RAG QUERY TEST ===")
+    try:
+        # Try interactive input first; fall back to a default query
+        try:
+            user_q = input("Enter your query (or press Enter to use default): ").strip()
+        except Exception:
+            user_q = ""
+
+        if not user_q:
+            user_q = "Give me a short summary of the key ideas from the context."
+
+        print(f"\nUsing sample uploaded file (as sample source_url): {uploaded_file_path}")
+        print(f"Query: {user_q}\n")
+
+        reply = generate_reply(user_q, summary=None, collection="default", top_k=5)
+        print("\n📘 FINAL RESPONSE:\n", reply)
+
+    except KeyboardInterrupt:
+        print("\nExiting test.")
+    except Exception as e:
+        print("Test failed:", str(e))
+
+
+if __name__ == "__main__":
+    main()
 
 
