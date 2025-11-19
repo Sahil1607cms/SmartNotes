@@ -80,7 +80,7 @@ export default function PdfTextSummarizer() {
         </button>
       </div>
       {/* Input */}
-      <div className="mb-4 mt-2 flex gap-2">
+      <div className="mb-4 mt-2 flex gap-2 max-h-[50px]">
         <input
           type="file"
           id="file-upload"
@@ -91,7 +91,7 @@ export default function PdfTextSummarizer() {
         {/* Custom styled label as button */}
         <label
           htmlFor="file-upload"
-          className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded cursor-pointer hover:bg-gray-700"
+          className="flex items-center  gap-2 px-4 py-2 bg-gray-800 text-white rounded cursor-pointer hover:bg-gray-700 "
         >
           <File className="w-5 h-5" />
           {file ? file.name : "Choose a file"}

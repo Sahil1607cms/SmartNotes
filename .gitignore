@@ -1,1 +1,58 @@
-backend/.env
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.pkl
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# ---- Virtual Environment ----
+venv/
+.env/
+env/
+.venv/
+
+# ---- FastAPI / Uvicorn ----
+# Logs
+*.log
+
+# Reload cache
+.pytest_cache/
+.cache/
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+
+# ---- dotenv / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Byte-compiled / Caches ----
+__pycache__/
+*.py[cod]
+
+# ---- MyPy ----
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ---- PyInstaller ----
+*.spec
+
+# ---- Coverage ----
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+
+# ---- Test folders ----
+tests/__pycache__/

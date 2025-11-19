@@ -9,6 +9,7 @@ class NoteModel(BaseModel):
     summary: str
     transcript: Optional[list[Dict[str, Any]] ] = None
     pdf_content: Optional[list[str]] = None
+    media_content: Optional[list[str]] = None
     source: str
     chat_content: Optional[str] = None
     embedding_reference: Optional[str] = None
