@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import ChatAssistant from "../components/ChatAssistant.jsx";
 import { Copy, Download } from "lucide-react";
 import Flashcards from "../components/Flashcards.jsx";
+import { jsPDF } from "jspdf";
 
 export default function SummaryPage({ summary, loading }) {
   const [activeTab, setActiveTab] = useState("summary");
@@ -10,6 +11,7 @@ export default function SummaryPage({ summary, loading }) {
   const [chatMessages, setChatMessages] = useState([
     { from: "bot", text: "Hi! 👋 Ask me anything about the summary." },
   ]);
+  const summaryRef = useRef();
 
   const handleCopyAll = () => {
     const textToCopy = summary;
@@ -18,30 +20,25 @@ export default function SummaryPage({ summary, loading }) {
     setTimeout(() => setCopied(false), 2000);
   };
   
-  const downloadPDF = async () => {
-  try {
-    const response = await fetch("http://localhost:8000/download-pdf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ markdown: summary }),
-    });
+  const downloadPDF = () => {
+  if (!summary) return;
 
-    if (!response.ok) throw new Error("PDF generation failed");
+  const doc = new jsPDF({
+    unit: "pt",
+    format: "a4",
+  });
 
-    const blob = await response.blob();
-    const pdfUrl = window.URL.createObjectURL(blob);
+  const margin = 40;
+  const maxWidth = 515; // A4 width minus margins
 
-    const a = document.createElement("a");
-    a.href = pdfUrl;
-    a.download = "summary.pdf";
-    a.click();
+  doc.setFont("Helvetica", "normal");
+  doc.setFontSize(12);
 
-    window.URL.revokeObjectURL(pdfUrl);
-  } catch (error) {
-    console.error("Error downloading PDF:", error);
-  }
+  const lines = doc.splitTextToSize(summary, maxWidth);
+  doc.text(lines, margin, margin);
+
+  doc.save("summary.pdf");
 };
-
 
 
   return (
@@ -86,7 +83,7 @@ export default function SummaryPage({ summary, loading }) {
         <div className="flex items-center gap-2">
           <button
           onClick={()=>downloadPDF()}
-          className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
+          className=" flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
         >
           <>
             <Download className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -95,7 +92,7 @@ export default function SummaryPage({ summary, loading }) {
         </button>
         <button
           onClick={handleCopyAll}
-          className="flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
+          className=" flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
         >
           {copied ? (
             <span className="text-green-400">Copied!</span>
@@ -112,7 +109,7 @@ export default function SummaryPage({ summary, loading }) {
 
       <div className="flex-1 min-h-0 min-w-full flex flex-col">
         {activeTab === "summary" && (
-          <div className="bg-black p-2 sm:p-4 rounded-lg shadow-inner  flex-1 overflow-y-auto  text-sm sm:text-base">
+          <div ref={summaryRef} className="bg-black p-2 sm:p-4 rounded-lg shadow-inner  flex-1 overflow-y-auto  text-sm sm:text-base">
             {loading ? (
               "⏳ Generating summary..."
             ) : summary ? (

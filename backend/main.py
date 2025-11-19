@@ -16,8 +16,14 @@ from services.media_summariser.process_media import process_media_file
 from database.historySchema import NoteModel, NoteResponseModel
 from database.crud import create_note, get_notes_by_user
 
-import subprocess
+
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.units import inch
 import tempfile
+import markdown2
 
 app = FastAPI()
 
@@ -301,38 +307,30 @@ Bullet Points:
 
 @app.post("/download-pdf")
 async def download_pdf(markdown: str = Body(..., embed=True)):
-    tmp_md_path = None
-    tmp_pdf_path = None
     try:
-        # 1. Create temporary markdown file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".md") as tmp_md:
-            tmp_md.write(markdown.encode("utf-8"))
-            tmp_md_path = tmp_md.name
+        # Convert markdown → simple HTML
+        html = markdown2.markdown(markdown)
 
-        # 2. Temporary output PDF file
-        tmp_pdf_path = tmp_md_path.replace(".md", ".pdf")
+        # Create a temporary PDF file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+            pdf_path = tmp_pdf.name
 
-        # 3 . Run md-to-pdf via Node (use text=True to get string output)
-        command = ["/c/Users/Sahil/AppData/Roaming/npm/md-to-pdf", tmp_md_path, "--dest", tmp_pdf_path]
+        # PDF document setup
+        doc = SimpleDocTemplate(pdf_path, pagesize=letter)
+        styles = getSampleStyleSheet()
+        story = []
 
-        process = subprocess.run(command, capture_output=True, text=True)
+        # Add HTML as a paragraph (ReportLab supports basic HTML tags)
+        story.append(Paragraph(html, styles["Normal"]))
 
-        print("STDOUT:", process.stdout)
-        print("STDERR:", process.stderr)
+        # Build PDF
+        doc.build(story)
 
-        if process.returncode != 0:
-            # Include stderr in the exception for debugging
-            raise HTTPException(status_code=500, detail=(process.stderr or "md-to-pdf failed"))
+        # Read PDF bytes
+        with open(pdf_path, "rb") as f:
+            pdf_bytes = f.read()
 
-        # 4. Read PDF bytes
-        if not os.path.exists(tmp_pdf_path):
-            raise HTTPException(status_code=500, detail="PDF file was not created")
-
-        with open(tmp_pdf_path, "rb") as pdf_file:
-            pdf_bytes = pdf_file.read()
-
-        # 5. Return PDF with headers
-        return Response(     #type: ignore
+        return Response(
             content=pdf_bytes,
             media_type="application/pdf",
             headers={
@@ -340,18 +338,12 @@ async def download_pdf(markdown: str = Body(..., embed=True)):
             },
         )
 
-    except HTTPException:
-        # re-raise HTTPExceptions unchanged
-        raise
     except Exception as e:
-        # Return a 500 with the error message
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"PDF generation failed: {e}")
+
     finally:
-        # Cleanup temporary files if they were created
         try:
-            if tmp_md_path and os.path.exists(tmp_md_path):
-                os.remove(tmp_md_path)
-            if tmp_pdf_path and os.path.exists(tmp_pdf_path):
-                os.remove(tmp_pdf_path)
-        except Exception:
+            if os.path.exists(pdf_path): #type: ignore
+                os.remove(pdf_path) #type: ignore
+        except:
             pass

@@ -1,2 +1,6 @@
 @import "tailwindcss";
 
+.pdf-export * {
+  color: #000 !important;
+  background-color: #fff !important;
+}
