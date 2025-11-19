@@ -60,3 +60,4 @@ To create an intelligent note-taking platform that automatically summarizes dive
 ## 10. Conclusion
 SmartNotes successfully integrates modern AI technologies (LLMs, vector embeddings, RAG) to create an efficient content summarization and knowledge extraction platform, demonstrating practical application of research concepts in a production-ready system.
 
+
