@@ -5,7 +5,7 @@ import { Copy, Download } from "lucide-react";
 import Flashcards from "../components/Flashcards.jsx";
 import { jsPDF } from "jspdf";
 
-export default function SummaryPage({ summary, loading }) {
+export default function SummaryPage({ summary, loading, noteId }) {
   const [activeTab, setActiveTab] = useState("summary");
   const [copied, setCopied] = useState(false);
   const [chatMessages, setChatMessages] = useState([
@@ -19,27 +19,26 @@ export default function SummaryPage({ summary, loading }) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-  
+
   const downloadPDF = () => {
-  if (!summary) return;
+    if (!summary) return;
 
-  const doc = new jsPDF({
-    unit: "pt",
-    format: "a4",
-  });
+    const doc = new jsPDF({
+      unit: "pt",
+      format: "a4",
+    });
 
-  const margin = 40;
-  const maxWidth = 515; // A4 width minus margins
+    const margin = 40;
+    const maxWidth = 515; // A4 width minus margins
 
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(12);
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
 
-  const lines = doc.splitTextToSize(summary, maxWidth);
-  doc.text(lines, margin, margin);
+    const lines = doc.splitTextToSize(summary, maxWidth);
+    doc.text(lines, margin, margin);
 
-  doc.save("summary.pdf");
-};
-
+    doc.save("summary.pdf");
+  };
 
   return (
     <div className="flex flex-col w-full h-full min-h-0 bg-black text-white p-2 sm:p-4 rounded-lg shadow-lg">
@@ -47,69 +46,72 @@ export default function SummaryPage({ summary, loading }) {
       <div className="flex flex-wrap justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
           <button
-          onClick={() => setActiveTab("summary")}
-          className={`px-3 sm:px-4 py-2 rounded font-bold cursor-pointer text-sm sm:text-base ${
-            activeTab === "summary"
-              ? "bg-yellow-400 text-black"
-              : "bg-gray-700 text-gray-300"
-          }`}
-        >
-          Summary
-        </button>
-        <button
-          onClick={() => setActiveTab("chat")}
-          disabled={!summary}
-          className={`px-3 sm:px-4 py-2 rounded font-bold cursor-pointer text-sm sm:text-base ${
-            activeTab === "chat"
-              ? "bg-yellow-400 text-black"
-              : "bg-gray-700 text-gray-300"
-          } ${!summary && "opacity-50 cursor-not-allowed"}`}
-        >
-          Ask AI
-        </button>
+            onClick={() => setActiveTab("summary")}
+            className={`px-3 sm:px-4 py-2 rounded font-bold cursor-pointer text-sm sm:text-base ${
+              activeTab === "summary"
+                ? "bg-yellow-400 text-black"
+                : "bg-gray-700 text-gray-300"
+            }`}
+          >
+            Summary
+          </button>
+          <button
+            onClick={() => setActiveTab("chat")}
+            disabled={!summary}
+            className={`px-3 sm:px-4 py-2 rounded font-bold cursor-pointer text-sm sm:text-base ${
+              activeTab === "chat"
+                ? "bg-yellow-400 text-black"
+                : "bg-gray-700 text-gray-300"
+            } ${!summary && "opacity-50 cursor-not-allowed"}`}
+          >
+            Ask AI
+          </button>
 
-        <button
-        onClick={() => setActiveTab("flashcards")}
-          disabled={!summary}
-          className={`px-3 sm:px-4 py-2 rounded font-bold cursor-pointer text-sm sm:text-base ${
-            activeTab === "flashcards"
-              ? "bg-yellow-400 text-black"
-              : "bg-gray-700 text-gray-300"
-          } ${!summary && "opacity-50 cursor-not-allowed"}`}
-        >
-          Flashcards
-        </button>
+          <button
+            onClick={() => setActiveTab("flashcards")}
+            disabled={!summary}
+            className={`px-3 sm:px-4 py-2 rounded font-bold cursor-pointer text-sm sm:text-base ${
+              activeTab === "flashcards"
+                ? "bg-yellow-400 text-black"
+                : "bg-gray-700 text-gray-300"
+            } ${!summary && "opacity-50 cursor-not-allowed"}`}
+          >
+            Flashcards
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <button
-          onClick={()=>downloadPDF()}
-          className=" flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
-        >
-          <>
-            <Download className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="">Save to PDF</span>
-          </>
-        </button>
-        <button
-          onClick={handleCopyAll}
-          className=" flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
-        >
-          {copied ? (
-            <span className="text-green-400">Copied!</span>
-          ) : (
+            onClick={() => downloadPDF()}
+            className=" flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
+          >
             <>
-              <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Copy Summary</span>
-              <span className="sm:hidden">Copy</span>
+              <Download className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="">Save to PDF</span>
             </>
-          )}
-        </button>
+          </button>
+          <button
+            onClick={handleCopyAll}
+            className=" flex items-center gap-1 px-2 py-1 bg-gray-800 hover:bg-gray-700 cursor-pointer ml-auto rounded text-xs sm:text-sm"
+          >
+            {copied ? (
+              <span className="text-green-400">Copied!</span>
+            ) : (
+              <>
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Copy Summary</span>
+                <span className="sm:hidden">Copy</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
       <div className="flex-1 min-h-0 min-w-full flex flex-col">
         {activeTab === "summary" && (
-          <div ref={summaryRef} className="bg-black p-2 sm:p-4 rounded-lg shadow-inner  flex-1 overflow-y-auto  text-sm sm:text-base">
+          <div
+            ref={summaryRef}
+            className="bg-black p-2 sm:p-4 rounded-lg shadow-inner  flex-1 overflow-y-auto  text-sm sm:text-base"
+          >
             {loading ? (
               "⏳ Generating summary..."
             ) : summary ? (
@@ -171,12 +173,11 @@ export default function SummaryPage({ summary, loading }) {
             summary={summary}
             chatMessages={chatMessages}
             setChatMessages={setChatMessages}
+            noteId={noteId}
           />
         )}
         {activeTab === "flashcards" && summary && (
-          <Flashcards
-            summary={summary}
-          />
+          <Flashcards summary={summary} />
         )}
       </div>
       <style>{`

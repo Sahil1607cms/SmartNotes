@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
 
 export default function Flashcards({ summary }) {
   const STORAGE_KEY = "flashcards_data";
@@ -71,12 +72,10 @@ export default function Flashcards({ summary }) {
   };
 
   const handleClearFlashcards = () => {
-    if (window.confirm("Are you sure you want to clear all flashcards?")) {
       setCards([]);
       setShuffled([]);
       setActiveCard(null);
       localStorage.removeItem(STORAGE_KEY);
-    }
   };
 
   useEffect(() => {
@@ -118,7 +117,11 @@ export default function Flashcards({ summary }) {
               whileHover={{ scale: 1.15 }}
               className="bg-gradient-to-br from-gray-700 to-gray-900 rounded-2xl p-6 cursor-pointer shadow-lg h-40 flex items-center justify-center text-center w-[190px]"
             >
-              <p className="text-sm font-medium line-clamp-3">{card.text}</p>
+              <p className="text-sm font-medium line-clamp-3">
+                <ReactMarkdown>
+                  {card.text}
+                </ReactMarkdown>
+              </p>
             </motion.div>
           ))}
         </div>

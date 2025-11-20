@@ -10,6 +10,7 @@ export default function AudioVideoSummarizer() {
   const [file, setFile] = useState(null); // store uploaded file
   const [error, setError] = useState("");
   const { user } = useAuth();
+  const [noteId, setNoteId] = useState("");
 
   // Persist summary locally so it survives navigation
   useEffect(() => {
@@ -22,6 +23,11 @@ export default function AudioVideoSummarizer() {
       localStorage.setItem("summary_audio_video", summary || "");
     }
   }, [summary]);
+
+  const clearStorage = () => {
+    localStorage.removeItem("summary_audio_video");
+    setSummary("");
+  };
 
   const handleSummarize = async () => {
     if (!file) {
@@ -55,6 +61,8 @@ export default function AudioVideoSummarizer() {
         setSummary("");
       } else if (data.summary) {
         setSummary(data.summary);
+        setNoteId(data.note.id)
+         console.log("Note ID:", data.note.id)
         setError("");
       } else {
         setError("Failed to generate summary. Please try again.");
@@ -73,9 +81,9 @@ export default function AudioVideoSummarizer() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between">
         <h1 className="text-xl sm:text-2xl md:text-3xl py-2 px-2 font-bold min-h-[50px]">
-        Select an Audio or Video to get the summary
-      </h1>
-      <button
+          Select an Audio or Video to get the summary
+        </h1>
+        <button
           onClick={() => clearStorage()}
           className="bg-amber-300   mt-2 text-black p-1 font-bold rounded-md cursor-pointer hover:bg-amber-200"
         >
@@ -100,9 +108,15 @@ export default function AudioVideoSummarizer() {
             htmlFor="file-upload"
             className="flex flex-col text-center justify-center items-center gap-2 px-4 py-2 h-[150px] sm:h-[200px] w-full bg-gray-800 text-white rounded cursor-pointer hover:bg-gray-700 border-dotted border-blue-400 border-2"
           >
-            <UploadCloud className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-700 p-1"/>
-            <span className="text-sm sm:text-base px-2">{file ? file.name : "Drag and drop or Browse your files"}</span>
-            <span className="text-[.7rem] sm:text-[.8rem] text-gray-400 px-2">{file ? "" : "Supported formats - MP3, WAV, M4A, MP4, AVI, MOV, etc."}</span>
+            <UploadCloud className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-700 p-1" />
+            <span className="text-sm sm:text-base px-2">
+              {file ? file.name : "Drag and drop or Browse your files"}
+            </span>
+            <span className="text-[.7rem] sm:text-[.8rem] text-gray-400 px-2">
+              {file
+                ? ""
+                : "Supported formats - MP3, WAV, M4A, MP4, AVI, MOV, etc."}
+            </span>
           </label>
           {error && (
             <div className="text-red-500 text-sm px-2 py-1 bg-red-50 rounded w-full">
@@ -119,7 +133,7 @@ export default function AudioVideoSummarizer() {
         </div>
 
         {/* Summary + Chat */}
-        <SummaryPage summary={summary} loading={loading} />
+        <SummaryPage summary={summary} loading={loading} noteId={noteId}/>
       </div>
     </div>
   );

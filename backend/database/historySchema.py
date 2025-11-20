@@ -8,11 +8,11 @@ class NoteModel(BaseModel):
     type: str | None
     summary: str
     transcript: Optional[list[Dict[str, Any]] ] = None
+    media_content: Optional[list[Dict[str, Any]] ] = None
     pdf_content: Optional[list[str]] = None
-    media_content: Optional[list[str]] = None
     source: str
     chat_content: Optional[str] = None
-    embedding_reference: Optional[str] = None
+    embeddings: Optional[list[Dict[str, Any]]] = None
 
 class NoteResponseModel(NoteModel):
     id: str

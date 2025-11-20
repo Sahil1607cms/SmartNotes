@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SummaryPage from "./SummaryPage";
 import VideoPreview from "../components/VideoPreview";
 import { auth } from "../firebase.js";
-import {jsPDF} from "jspdf"
+import { jsPDF } from "jspdf";
 
 export default function YoutubeSummarizer() {
   const [url, setUrl] = useState("");
@@ -11,6 +11,7 @@ export default function YoutubeSummarizer() {
   const [transcript, setTranscript] = useState([]);
   const [userID, setUserID] = useState(null);
   const [title, setTitle] = useState("YouTube Video");
+  const [noteId, setNoteId] = useState("");
 
   // Track Firebase auth user
   useEffect(() => {
@@ -51,7 +52,6 @@ export default function YoutubeSummarizer() {
     setTranscript([]);
   };
 
-  
   const handleSummarize = async () => {
     if (!url.trim()) return;
     if (!transcript || transcript.length === 0) {
@@ -80,7 +80,12 @@ export default function YoutubeSummarizer() {
 
       const data = await res.json();
       console.log("Backend response:", data);
-      if (data.summary) setSummary(data.summary);
+      if (data.summary) 
+      {
+         setSummary(data.summary);
+         setNoteId(data.note.id)
+         console.log("Note ID:", data.note.id)
+      }
       else setSummary("❌ Failed to generate summary.");
     } catch (err) {
       console.error(err);
@@ -133,7 +138,7 @@ export default function YoutubeSummarizer() {
           setTranscript={setTranscript}
           setTitle={setTitle}
         />
-        <SummaryPage summary={summary} loading={loading} />
+        <SummaryPage summary={summary} loading={loading} noteId={noteId}/>
       </div>
     </div>
   );

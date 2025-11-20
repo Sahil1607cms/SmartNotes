@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
-
-const ChatAssistant = ({ summary, chatMessages, setChatMessages, collection = "default" }) => {
+import ReactMarkdown from "react-markdown";
+const ChatAssistant = ({ summary, chatMessages, setChatMessages, noteId }) => {
   const [chatInput, setChatInput] = useState("");
   const [prompts, setPrompts] = useState([]);
   const messagesEndRef = useRef(null);
@@ -28,8 +28,6 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, collection = "d
     if (summary) fetchPrompts();
   }, [summary]);
 
-  
-
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
 
@@ -42,15 +40,18 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, collection = "d
       const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: chatInput, summary, collection }),
+        body: JSON.stringify({ message: chatInput, summary, note_id: noteId }),
       });
       const data = await res.json();
-      const botMsg = { from: "bot", text: data.reply || "⚠️ No reply received." };
+      const botMsg = {
+        from: "bot",
+        text: data.reply || "⚠️ No reply received.",
+      };
       setChatMessages((prev) => [...prev, botMsg]);
     } catch {
       setChatMessages((prev) => [
         ...prev,
-        { from: "bot", text: "Elon Musk is a billionaire entrepreneur and engineer known for founding SpaceX and Tesla. He focuses on advancing space exploration, electric vehicles, and sustainable energy, and is involved in projects like Neuralink and The Boring Company." },
+        { from: "bot", text: "Having trouble generating a response." },
       ]);
     } finally {
       setThinking(false);
@@ -63,18 +64,18 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, collection = "d
         {chatMessages.map((msg, idx) => (
           <div
             key={idx}
-            className={`max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-xs sm:text-sm ${
+            className={`max-w-[65%] px-3 py-2 rounded-lg text-lg font-semibold ${
               msg.from === "bot"
                 ? "text-white self-start"
-                : "bg-gray-600 text-white self-end ml-auto"
+                : "bg-gray-600 text-white self-end ml-auto" 
             }`}
           >
-            {msg.text}
+            <ReactMarkdown>{msg.text}</ReactMarkdown>
           </div>
         ))}
 
         {thinking && (
-          <div className="max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-xs sm:text-sm text-white self-start">
+          <div className="max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-md  text-white self-start">
             🤔 Thinking, please wait...
           </div>
         )}
@@ -90,9 +91,9 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, collection = "d
                 setChatInput(msg.text);
                 setTimeout(() => handleSendMessage(), 0);
               }}
-              className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm cursor-pointer whitespace-nowrap"
+              className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-lg text-xs  cursor-pointer whitespace-nowrap"
             >
-              {msg.text}
+              <ReactMarkdown>{msg.text}</ReactMarkdown>
             </div>
           ))}
         </div>

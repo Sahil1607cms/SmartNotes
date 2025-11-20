@@ -8,7 +8,7 @@ export default function PdfTextSummarizer() {
   const [file, setFile] = useState(null);
   const [userID, setUserID] = useState(null);
   const [title, setTitle] = useState("PDF");
-
+const [noteId, setNoteId] = useState("");
   // Track Firebase auth user
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
