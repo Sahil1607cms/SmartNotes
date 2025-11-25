@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { Search, X, Copy } from "lucide-react";
+import { Search, X, Copy, Trash2 } from "lucide-react";
 import { auth } from "../firebase.js";
 
 export default function History() {
@@ -105,6 +105,26 @@ export default function History() {
     });
   };
 
+  const deleteNote = async (noteId) => {
+
+
+    try {
+      const res = await fetch(`http://localhost:8000/notes/${noteId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete note");
+      }
+
+      // Remove note from state
+      setNotes((prev) => prev.filter((note) => note.id !== noteId));
+      setSelectedNote(null);
+    } catch (error) {
+      alert("Error deleting note: " + error.message);
+    }
+  };
+
   return (
     <div className="mx-auto p-3 sm:p-6 flex flex-col h-[100vh]">
       <h1 className="text-xl sm:text-2xl font-bold mb-4">Notes History</h1>
@@ -167,12 +187,21 @@ export default function History() {
               <X size={20} className="sm:w-6 sm:h-6" />
             </button>
 
+            {/* Delete button */}
+            <button
+              onClick={() => deleteNote(selectedNote.id)}
+              className="absolute  top-2 right-12 sm:top-3 sm:right-14 text-white bg-red-600 rounded-md hover:bg-red-700 flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
+            >
+              <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden sm:inline">Delete</span>
+            </button>
+
             {/* Copy button */}
             <button
               onClick={() => copySummary(selectedNote.summary)}
-              className="absolute top-2 right-10 sm:top-3 sm:right-12 text-black bg-white rounded-md hover:bg-gray-200 flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
+              className="absolute top-2 right-24 sm:top-3 sm:right-28 text-black bg-white rounded-md hover:bg-gray-200 flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
             >
-              <Copy size={16} className="sm:w-[18px] sm:h-[18px] text-black" />{" "}
+              <Copy size={16} className="sm:w-[18px] sm:h-[18px] text-black" />
               <span className="hidden sm:inline">Copy</span>
             </button>
 

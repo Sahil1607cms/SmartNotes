@@ -38,3 +38,11 @@ def create_note(note: NoteModel):
 def get_notes_by_user(user_id: str):
     notes = notes_collection.find({"user_id": user_id}).sort("created_at", -1)
     return [note_helper(note) for note in notes]
+
+# DELETE note by id
+def delete_note_by_id(note_id: str):
+    try:
+        result = notes_collection.delete_one({"_id": ObjectId(note_id)})
+        return result.deleted_count > 0
+    except Exception as e:
+        raise Exception(f"Error deleting note: {str(e)}")
