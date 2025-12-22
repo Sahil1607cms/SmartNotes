@@ -712,3 +712,7 @@ For issues, questions, or suggestions:
 **Last Updated**: December 2025  
 **Status**: ✅ Active Development
 
+## Backend Requirements
+See [Backend requirements (backend/requirements.txt)](README_BACKEND_REQUIREMENTS.md)
+
+

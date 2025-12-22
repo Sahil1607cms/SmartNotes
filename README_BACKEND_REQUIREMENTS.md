@@ -1,3 +1,7 @@
+# Backend Requirements (backend/requirements.txt)
+
+The following are the Python package requirements used by the backend (from `backend/requirements.txt`):
+
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.2
 aiosignal==1.4.0
