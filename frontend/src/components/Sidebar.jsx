@@ -48,7 +48,7 @@ const Sidebar = () => {
           <Youtube size={20} /> YouTube
         </NavLink>
       </li>
-      <li>
+      {/* <li>
         <NavLink to="/audio-video" className={linkClasses}>
           <AudioLines size={20} /> Audio/Video
         </NavLink>
@@ -57,7 +57,7 @@ const Sidebar = () => {
         <NavLink to="/pdf-text" className={linkClasses}>
           <FileText size={20} /> PDF
         </NavLink>
-      </li>
+      </li> */}
       <li>
         <NavLink to="/history" className={linkClasses}>
           <Clock size={20} /> History
