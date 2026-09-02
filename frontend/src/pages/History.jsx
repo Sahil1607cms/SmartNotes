@@ -1,103 +1,95 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { Search, X, Copy, Trash2 } from "lucide-react";
+import { Search, X, Copy, Trash2, RefreshCw } from "lucide-react";
 import { auth } from "../firebase.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import {
+  getStoredNotes,
+  removeNoteFromHistory,
+  syncNotesFromDB,
+  HISTORY_UPDATED_EVENT,
+} from "../utils/historyStorage.js";
 
 export default function History() {
   const [search, setSearch] = useState("");
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user: authUser } = useAuth();
+  
+  // Instant load from localStorage cache (0ms latency!)
+  const [notes, setNotes] = useState(() => getStoredNotes());
+  const [loading, setLoading] = useState(() => getStoredNotes().length === 0);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState("");
   const [selectedNote, setSelectedNote] = useState(null);
 
   useEffect(() => {
-    const fetchNotes = async () => {
+    let isMounted = true;
+
+    // Direct MongoDB sync on routing to History tab
+    const fetchFromDB = async (targetUser) => {
+      const uid = targetUser?.uid || authUser?.uid || auth.currentUser?.uid || localStorage.getItem("smartnotes_uid");
+      if (!uid) {
+        if (isMounted) setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("smartnotes_uid", uid);
+      if (isMounted) setSyncing(true);
+
       try {
-        const user = auth.currentUser;
-        if (!user) throw new Error("User not logged in");
-
-        const userId = user.uid;
-        const response = await fetch(
-          `http://localhost:8000/notes/?user_id=${userId}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch notes");
-
-        const data = await response.json();
-        if (data.error) throw new Error(data.error);
-        if (!Array.isArray(data)) {
-          setNotes([]);
-          return;
+        const freshNotes = await syncNotesFromDB(uid);
+        if (isMounted) {
+          setNotes(freshNotes);
+          setError("");
         }
-
-        const formattedNotes = data.map((note) => ({
-          ...note,
-          date: note.created_at
-            ? new Date(note.created_at).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "Unknown date",
-        }));
-
-        setNotes(formattedNotes);
       } catch (err) {
-        setError(err.message);
-        setNotes([]);
+        console.error("MongoDB fetch error in History:", err);
+        if (isMounted) setError("Failed to load notes from database.");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          setSyncing(false);
+        }
       }
     };
 
-    fetchNotes();
-  }, []);
+    // 1. Fetch from MongoDB immediately on tab click / mount
+    fetchFromDB(authUser || auth.currentUser);
+
+    // 2. Refresh UI state whenever local storage cache updates
+    const updateFromCache = () => {
+      if (isMounted) {
+        setNotes(getStoredNotes());
+        setLoading(false);
+      }
+    };
+    window.addEventListener(HISTORY_UPDATED_EVENT, updateFromCache);
+
+    // 3. Auth listener backup
+    const unsubscribe = auth.onAuthStateChanged((u) => {
+      if (u) fetchFromDB(u);
+    });
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener(HISTORY_UPDATED_EVENT, updateFromCache);
+      unsubscribe();
+    };
+  }, [authUser]);
+
+  const handleManualRefresh = async () => {
+    const uid = authUser?.uid || auth.currentUser?.uid || localStorage.getItem("smartnotes_uid");
+    if (!uid) return;
+    setSyncing(true);
+    const freshNotes = await syncNotesFromDB(uid);
+    setNotes(freshNotes);
+    setSyncing(false);
+  };
 
   const filteredNotes = notes.filter(
     (note) =>
-      note.title.toLowerCase().includes(search.toLowerCase()) ||
-      note.summary.toLowerCase().includes(search.toLowerCase())
+      (note.title && note.title.toLowerCase().includes(search.toLowerCase())) ||
+      (note.summary && note.summary.toLowerCase().includes(search.toLowerCase()))
   );
-
-  // Format summary function
-  const formatSummary = (text) => {
-    if (!text) return "";
-
-    let formatted = text;
-
-    // Bold
-    formatted = formatted.replace(
-      /\*\*(.*?)\*\*/g,
-      '<span class="font-bold">$1</span>'
-    );
-
-    // Headings
-    formatted = formatted.replace(
-      /^###\s+(.*)$/gm,
-      '<span class="text-lg font-semibold">$1</span><br>'
-    );
-    formatted = formatted.replace(
-      /^##\s+(.*)$/gm,
-      '<span class="text-lg font-semibold">$1</span><br>'
-    );
-    formatted = formatted.replace(
-      /^#\s+(.*)$/gm,
-      '<span class="text-lg font-semibold">$1</span><br>'
-    );
-
-    // Bullets
-    formatted = formatted.replace(/^\s*[\*\-]\s+(.*)$/gm, "<li>$1</li>");
-    if (/<li>/.test(formatted)) {
-      formatted = formatted.replace(
-        /(<li>.*<\/li>)/gs,
-        '<ul class="list-disc list-inside mb-2">$1</ul>'
-      );
-    }
-
-    // Remaining line breaks
-    formatted = formatted.replace(/\n/g, "<br>");
-
-    return formatted;
-  };
 
   const copySummary = (text) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -106,28 +98,35 @@ export default function History() {
   };
 
   const deleteNote = async (noteId) => {
-
-
     try {
-      const res = await fetch(`http://localhost:8000/notes/${noteId}`, {
+      // Instantly remove from local storage & UI state
+      removeNoteFromHistory(noteId);
+      setNotes((prev) => prev.filter((n) => (n.id || n._id) !== noteId));
+      setSelectedNote(null);
+
+      // Async delete from MongoDB
+      await fetch(`http://localhost:8000/notes/${noteId}`, {
         method: "DELETE",
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete note");
-      }
-
-      // Remove note from state
-      setNotes((prev) => prev.filter((note) => note.id !== noteId));
-      setSelectedNote(null);
     } catch (error) {
-      alert("Error deleting note: " + error.message);
+      console.error("Error deleting note from backend:", error);
     }
   };
 
   return (
     <div className="mx-auto p-3 sm:p-6 flex flex-col h-[100vh]">
-      <h1 className="text-xl sm:text-2xl font-bold mb-4">Notes History</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold">Notes History</h1>
+        <button
+          onClick={handleManualRefresh}
+          disabled={syncing}
+          className="flex items-center gap-1.5 text-xs sm:text-sm bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-1.5 rounded-lg border border-gray-700 transition cursor-pointer"
+          title="Sync with MongoDB"
+        >
+          <RefreshCw size={14} className={syncing ? "animate-spin text-blue-400" : ""} />
+          <span>{syncing ? "Syncing..." : "Refresh"}</span>
+        </button>
+      </div>
 
       <div className="relative mb-4">
         <Search className="absolute left-3 top-3 text-gray-400" size={18} />
@@ -136,30 +135,33 @@ export default function History() {
           placeholder="Search notes..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring focus:ring-blue-300 outline-none text-sm sm:text-base"
+          className="w-full pl-10 pr-4 py-2 border border-gray-700 rounded-xl focus:ring focus:ring-blue-300 outline-none text-sm sm:text-base bg-gray-900 text-white"
         />
       </div>
 
-      {loading && (
-        <p className="text-gray-400 text-center py-8">Loading notes...</p>
+      {loading && notes.length === 0 && (
+        <p className="text-gray-400 text-center py-8">Loading notes from database...</p>
       )}
-      {error && <p className="text-red-400 text-center py-8">Error: {error}</p>}
 
-      {!loading && !error && (
-        <div className="flex-1 overflow-y-auto space-y-4 border-t border-gray-600 pt-2">
+      {error && notes.length === 0 && (
+        <p className="text-red-400 text-center py-8">Error: {error}</p>
+      )}
+
+      {!loading && (
+        <div className="flex-1 overflow-y-auto space-y-4 border-t border-gray-700 pt-2">
           {filteredNotes.length > 0 ? (
             filteredNotes.map((note) => (
               <div
-                key={note.id}
+                key={note.id || note._id || Math.random()}
                 onClick={() => setSelectedNote(note)}
-                className="p-3 sm:p-4 border-0 rounded-xl hover:bg-gray-700 cursor-pointer transition"
+                className="p-3 sm:p-4 border border-gray-800 rounded-xl hover:bg-gray-800 bg-gray-900/60 cursor-pointer transition"
               >
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
                   <h2 className="text-base sm:text-lg text-yellow-300 font-semibold break-words">
-                    {note.title}
+                    {note.title || "Untitled Note"}
                   </h2>
-                  <span className="text-xs sm:text-sm text-gray-300 whitespace-nowrap">
-                    {note.date}
+                  <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">
+                    {note.date || "Unknown date"}
                   </span>
                 </div>
                 <p className="text-sm sm:text-base text-gray-300 line-clamp-2">
@@ -175,11 +177,10 @@ export default function History() {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modal View for Note Details */}
       {selectedNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-2 sm:p-4">
-          <div className="bg-gray-800 rounded-xl w-full  p-4 sm:p-6 relative flex flex-col max-h-[90vh]">
-            {/* Close button */}
+        <div className="fixed inset-0 bg-black/70 bg-opacity-50 flex justify-center items-center z-50 p-2 sm:p-4">
+          <div className="bg-gray-800 rounded-xl w-full max-w-4xl p-4 sm:p-6 relative flex flex-col max-h-[90vh]">
             <button
               onClick={() => setSelectedNote(null)}
               className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-white p-1"
@@ -187,16 +188,14 @@ export default function History() {
               <X size={20} className="sm:w-6 sm:h-6" />
             </button>
 
-            {/* Delete button */}
             <button
-              onClick={() => deleteNote(selectedNote.id)}
-              className="absolute  top-2 right-12 sm:top-3 sm:right-14 text-white bg-red-600 rounded-md hover:bg-red-700 flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
+              onClick={() => deleteNote(selectedNote.id || selectedNote._id)}
+              className="absolute top-2 right-12 sm:top-3 sm:right-14 text-white bg-red-600 rounded-md hover:bg-red-700 flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
             >
               <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
               <span className="hidden sm:inline">Delete</span>
             </button>
 
-            {/* Copy button */}
             <button
               onClick={() => copySummary(selectedNote.summary)}
               className="absolute top-2 right-24 sm:top-3 sm:right-28 text-black bg-white rounded-md hover:bg-gray-200 flex items-center gap-1 px-2 py-1 text-xs sm:text-sm"
@@ -206,65 +205,43 @@ export default function History() {
             </button>
 
             <h2 className="text-lg sm:text-2xl mt-2 font-bold text-yellow-300 mb-4 pr-16 break-words">
-              {selectedNote.title}
+              {selectedNote.title || "Untitled Note"}
             </h2>
-            <p className="text-md sm:text-lg  font-bold mb-2 break-all">
-              Title: {selectedNote.title}
+            <p className="text-xs sm:text-sm font-bold mb-2 text-gray-300">
+              Type: {selectedNote.type || "Document"}
             </p>
-            <p className="text-xs sm:text-sm font-bold mb-2">
-              Type: {selectedNote.type}
-            </p>
-            <p className="text-xs sm:text-sm font-bold mb-4 break-all">
-              Source: {selectedNote.source}
-            </p>
+            {selectedNote.source && (
+              <p className="text-xs sm:text-sm font-bold mb-4 break-all text-gray-400">
+                Source: {selectedNote.source}
+              </p>
+            )}
 
-            {/* Scrollable summary */}
-            <div
-              className="overflow-y-auto text-gray-300 text-3xl sm:text-base"
-              style={{ maxHeight: "90vh" }}
-            >
+            <div className="overflow-y-auto text-gray-300 text-sm sm:text-base border-t border-gray-700 pt-4 flex-1">
               <ReactMarkdown
                 components={{
                   h1: ({ node, ...props }) => (
-                    <h1
-                      className="text-yellow-400 font-bold text-4xl mt-2 mb-2"
-                      {...props}
-                    />
+                    <h1 className="text-yellow-400 font-bold text-2xl mt-2 mb-2" {...props} />
                   ),
                   h2: ({ node, ...props }) => (
-                    <h2
-                      className="text-yellow-400 font-bold text-3xl mt-2 mb-2"
-                      {...props}
-                    />
+                    <h2 className="text-yellow-400 font-bold text-xl mt-2 mb-2" {...props} />
                   ),
                   h3: ({ node, ...props }) => (
-                    <h3
-                      className="text-yellow-400 font-bold text-2xl mt-2 mb-2"
-                      {...props}
-                    />
+                    <h3 className="text-yellow-400 font-bold text-lg mt-2 mb-2" {...props} />
                   ),
-
                   strong: ({ node, ...props }) => (
-                    <strong
-                      className="text-yellow-400 font-bold text-xl mb-10 mt-10"
-                      {...props}
-                    />
+                    <strong className="text-yellow-300 font-bold" {...props} />
                   ),
-
                   p: ({ node, ...props }) => (
-                    <p className="text-white text-md mb-3 mt-3" {...props} />
+                    <p className="text-gray-200 text-sm sm:text-base mb-3" {...props} />
                   ),
-
                   ul: ({ node, ...props }) => (
                     <ul className="list-disc ml-4 mb-2 mt-2" {...props} />
                   ),
-
                   ol: ({ node, ...props }) => (
-                    <ol className="list-decimal ml-4 " {...props} />
+                    <ol className="list-decimal ml-4 mb-2 mt-2" {...props} />
                   ),
-
                   li: ({ node, ...props }) => (
-                    <li className="text-white text-md " {...props} />
+                    <li className="text-gray-200 text-sm sm:text-base mb-1" {...props} />
                   ),
                 }}
               >

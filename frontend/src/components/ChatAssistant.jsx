@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+
 const ChatAssistant = ({ summary, chatMessages, setChatMessages, noteId }) => {
-  if (!noteId)
-    return null
+  if (!noteId) return null;
   const [chatInput, setChatInput] = useState("");
   const [prompts, setPrompts] = useState([]);
   const messagesEndRef = useRef(null);
@@ -34,6 +34,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, noteId }) => {
     if (!chatInput.trim()) return;
 
     const userMsg = { from: "user", text: chatInput };
+    const historyPayload = chatMessages; // Captures strictly PREVIOUS conversation turns
     setChatMessages((prev) => [...prev, userMsg]);
     setChatInput("");
     setThinking(true);
@@ -42,7 +43,12 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, noteId }) => {
       const res = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: chatInput, summary, note_id: noteId }),
+        body: JSON.stringify({
+          message: userMsg.text,
+          summary,
+          note_id: noteId,
+          history: historyPayload,
+        }),
       });
       const data = await res.json();
       const botMsg = {
@@ -69,7 +75,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, noteId }) => {
             className={`max-w-[65%] px-3 py-2 rounded-lg text-lg font-semibold ${
               msg.from === "bot"
                 ? "text-white self-start"
-                : "bg-gray-600 text-white self-end ml-auto" 
+                : "bg-gray-600 text-white self-end ml-auto"
             }`}
           >
             <ReactMarkdown>{msg.text}</ReactMarkdown>
@@ -77,7 +83,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, noteId }) => {
         ))}
 
         {thinking && (
-          <div className="max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-md  text-white self-start">
+          <div className="max-w-[85%] sm:max-w-xs px-3 py-2 rounded-lg text-md text-white self-start">
             🤔 Thinking, please wait...
           </div>
         )}
@@ -93,7 +99,7 @@ const ChatAssistant = ({ summary, chatMessages, setChatMessages, noteId }) => {
                 setChatInput(msg.text);
                 setTimeout(() => handleSendMessage(), 0);
               }}
-              className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-lg text-xs  cursor-pointer whitespace-nowrap"
+              className="bg-blue-600 text-white px-2 sm:px-3 py-1 rounded-lg text-xs cursor-pointer whitespace-nowrap"
             >
               <ReactMarkdown>{msg.text}</ReactMarkdown>
             </div>
