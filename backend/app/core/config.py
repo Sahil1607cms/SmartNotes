@@ -15,8 +15,8 @@ MAX_CONCURRENT_SUMMARIES = int(os.getenv("MAX_CONCURRENT_SUMMARIES", "1"))
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "5000"))  # ~1,250 tokens (tailored for Groq's 8,000 TPM limit)
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "400"))
 
-MONGODB_URI = os.getenv(
-    "MONGODB_URI",
-    "mongodb+srv://sahil16072004_db_user:MawDWGwbH7gcb3hF@cluster0.cvrmksw.mongodb.net/?appName=Cluster0"
-)
+MONGODB_URI = os.getenv("MONGODB_URI")
+if not MONGODB_URI:
+    raise RuntimeError("MONGODB_URI is not set. Add it to backend/.env")
+
 MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME", "notesDB")
